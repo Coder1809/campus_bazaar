@@ -6,24 +6,24 @@ export const connectDB = async () => {
     
     if (rawUri) {
         try {
-            let uri = rawUri;
-            if (!rawUri.includes('mongodb+srv') && !rawUri.includes('?')) {
-                const parts = rawUri.replace(/\/$/, '').split('/');
-                const lastPart = parts[parts.length - 1];
-                if (!lastPart.includes(':') && lastPart !== '') {
-                    // DB name already present in URI
-                    uri = rawUri;
+            let uri = rawUri.trim();
+            // Handle mongodb+srv and standard URIs to ensure DB_NAME is set
+            if (!uri.includes(`/${DB_NAME}`) && !uri.includes(`/${DB_NAME}?`)) {
+                if (uri.includes('?')) {
+                    const [base, query] = uri.split('?');
+                    uri = `${base.replace(/\/$/, '')}/${DB_NAME}?${query}`;
                 } else {
-                    uri = `${rawUri.replace(/\/$/, '')}/${DB_NAME}`;
+                    uri = `${uri.replace(/\/$/, '')}/${DB_NAME}`;
                 }
             }
+
             const connectionInstance = await mongoose.connect(uri, {
-                serverSelectionTimeoutMS: 5000
+                serverSelectionTimeoutMS: 10000
             });
             console.log(`\n MongoDB Connected !! ${connectionInstance.connection.host}`);
             return;
         } catch (error) {
-            console.log('Primary MongoDB connection failed, attempting local MongoDB fallback...', error.message);
+            console.error('Primary MongoDB connection failed:', error.message);
         }
     }
 
@@ -32,7 +32,10 @@ export const connectDB = async () => {
         const localInstance = await mongoose.connect(localUri);
         console.log(`\n Local MongoDB Connected !! ${localInstance.connection.host}`);
     } catch (fallbackError) {
-        console.log('MONGO DB connection error (both primary and local failed):', fallbackError.message);
+        console.error('MONGO DB connection error (both primary and local failed):', fallbackError.message);
+        if (process.env.NODE_ENV === 'production') {
+            console.error('CRITICAL: Check MONGODB_URI and Atlas IP whitelist (0.0.0.0/0) in Render environment variables.');
+        }
         process.exit(1);
     }
 };

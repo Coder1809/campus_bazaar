@@ -65,10 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
         email: email.toLowerCase(),
         username: username.toLowerCase(),
         password,
-        phone,
-        campus,
-        hostelBlock,
-        roomNumber,
+        college: campus || req.body.college || "NIT Raipur",
         avatar: avatarUrl,
         isVerified: true
     })

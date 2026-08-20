@@ -24,6 +24,14 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(express.static("public"))
 app.use(cookieParser())
 
+// Health check routes
+app.get("/", (req, res) => {
+    res.status(200).json({ status: "ok", service: "CampusBazaar API", timestamp: new Date().toISOString() });
+});
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok" });
+});
+
 // Routes import
 import userRoutes from "./routes/user.route.js"
 import itemRoutes from "./routes/item.route.js"
