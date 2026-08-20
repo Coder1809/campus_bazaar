@@ -34,8 +34,7 @@ export const connectDB = async () => {
     } catch (fallbackError) {
         console.error('MONGO DB connection error (both primary and local failed):', fallbackError.message);
         if (process.env.NODE_ENV === 'production') {
-            console.error('CRITICAL: Check MONGODB_URI and Atlas IP whitelist (0.0.0.0/0) in Render environment variables.');
+            console.error('CRITICAL: Verify MONGODB_URI and Atlas IP whitelist (0.0.0.0/0) in Render dashboard.');
         }
-        process.exit(1);
     }
 };

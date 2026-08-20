@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
+dotenv.config();
 
 import { createServer } from 'http';
 import { connectDB } from "./db/index.js";
@@ -8,15 +8,19 @@ import { initializeSocket } from './socket.js';
 import { startReminderScheduler } from './services/reminder.service.js';
 
 const server = createServer(app);
+const port = process.env.PORT || 8000;
+
+server.listen(port, () => {
+    console.log(`CampusBazaar Server running on port ${port} 🔥`);
+});
+
+initializeSocket(server);
 
 connectDB()
     .then(() => {
-        initializeSocket(server);
         startReminderScheduler();
-        const port = process.env.PORT || 8000;
-        server.listen(port, () => console.log(`Server running on port ${port} 🔥`));
+        console.log('Database and services initialized successfully');
     })
     .catch((err) => {
-        console.log('MongoDB connection failed', err);
-        process.exit(1);
+        console.error('MongoDB initial connection error:', err.message);
     });

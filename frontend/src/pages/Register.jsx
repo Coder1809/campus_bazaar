@@ -55,7 +55,8 @@ export default function Register() {
             toast.success('Registration successful! Please log in.');
             navigate('/login');
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Registration failed');
+            const msg = error.response?.data?.message || (error.response?.status === 502 ? 'Backend is waking up from sleep. Please try again in 15 seconds.' : 'Registration failed. Please check details.');
+            toast.error(msg);
         } finally {
             setIsLoading(false);
         }
